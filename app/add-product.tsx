@@ -11,17 +11,20 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useVinyls } from '../src/contexts/VinylsContext';
 
 export default function AddProductScreen() {
   const router = useRouter();
   const { addVinyl } = useVinyls();
+  const insets = useSafeAreaInsets();
 
   const [title, setTitle] = useState('');
   const [artist, setArtist] = useState('');
   const [price, setPrice] = useState('200');
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [gender, setGender] = useState<'feminino' | 'masculino'>('feminino');
 
   const handleSave = () => {
     if (!title.trim() || !artist.trim()) {
@@ -35,6 +38,7 @@ export default function AddProductScreen() {
       price: Number(price) || 0,
       description: description.trim(),
       image: imageUrl.trim() ? { uri: imageUrl.trim() } : require('../src/assets/disko-logo.png'),
+      gender,
       tracks: [],
     });
 
@@ -46,7 +50,7 @@ export default function AddProductScreen() {
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 20 }]} keyboardShouldPersistTaps="handled">
         <Text style={styles.title}>Adicionar disco</Text>
 
         <View style={styles.field}>
@@ -102,6 +106,28 @@ export default function AddProductScreen() {
           />
         </View>
 
+        <View style={styles.field}>
+          <Text style={styles.label}>Gênero</Text>
+          <View style={styles.genderRow}>
+            <TouchableOpacity
+              style={[styles.genderButton, gender === 'feminino' && styles.genderSelected]}
+              onPress={() => setGender('feminino')}
+            >
+              <Text style={[styles.genderText, gender === 'feminino' && styles.genderTextSelected]}>
+                Feminino
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.genderButton, gender === 'masculino' && styles.genderSelected]}
+              onPress={() => setGender('masculino')}
+            >
+              <Text style={[styles.genderText, gender === 'masculino' && styles.genderTextSelected]}>
+                Masculino
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         <TouchableOpacity style={styles.button} onPress={handleSave}>
           <Text style={styles.buttonLabel}>Salvar</Text>
         </TouchableOpacity>
@@ -148,6 +174,32 @@ const styles = StyleSheet.create({
   multiline: {
     minHeight: 90,
     textAlignVertical: 'top',
+  },
+  genderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  genderButton: {
+    flex: 1,
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 5,
+    backgroundColor: '#fafafa',
+  },
+  genderSelected: {
+    backgroundColor: '#1b74e4',
+    borderColor: '#1b74e4',
+  },
+  genderText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  genderTextSelected: {
+    color: '#fff',
   },
   button: {
     height: 52,

@@ -1,27 +1,117 @@
 import { useRouter } from 'expo-router';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { TabView, SceneMap } from 'react-native-tab-view';
+import { useState } from 'react';
 import { Logo } from '../../components/logo';
 import { useAuth } from '../../contexts/AuthContext';
 import { useVinyls } from '../../contexts/VinylsContext';
 
-export function ProductsScreen() {
-  const insets = useSafeAreaInsets();
-  const router = useRouter();
-  const { logout } = useAuth();
-  const { vinyls } = useVinyls();
+interface Vinyl {
+  id: string;
+  title: string;
+  artist: string;
+  price: number;
+  image: any;
+}
 
-  const handleLogout = () => {
-    logout();
-    router.replace('/login');
-  };
+interface VinylListProps {
+  data: Vinyl[];
+}
+
+function VinylList({ data }: VinylListProps) {
+  const router = useRouter();
 
   const handlePressVinyl = (id: string) => {
     router.push(`/product/${id}`);
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}> 
+    <FlatList
+      data={data}
+      keyExtractor={(item) => item.id}
+      numColumns={2}
+      contentContainerStyle={styles.list}
+      columnWrapperStyle={styles.row}
+      renderItem={({ item }) => {
+        const imageSource = typeof item.image === 'string' ? { uri: item.image } : item.image;
+
+        return (
+          <TouchableOpacity
+            style={styles.card}
+            activeOpacity={0.8}
+            onPress={() => handlePressVinyl(item.id)}
+            onLongPress={() => router.push(`/edit-product/${item.id}`)}
+          >
+            <Image source={imageSource} style={styles.thumbnail} />
+            <View style={styles.cardBody}>
+              <Text numberOfLines={1} style={styles.productTitle}>
+                {item.title}
+              </Text>
+              <Text numberOfLines={1} style={styles.productArtist}>
+                {item.artist}
+              </Text>
+              <Text style={styles.price}>R$ {item.price.toFixed(2)}</Text>
+            </View>
+          </TouchableOpacity>
+        );
+      }}
+      ListFooterComponent={() => (
+        <View style={styles.footerButtons}>
+          <TouchableOpacity
+            style={styles.footerButton}
+            onPress={() => router.push('/add-product')}
+          >
+            <Text style={styles.footerButtonText}>Adicionar disco</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.footerButton, styles.footerButtonSecondary]}
+            onPress={() => router.push('/settings')}
+          >
+            <Text style={[styles.footerButtonText, styles.footerButtonSecondaryText]}>
+              Gerenciar discos
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    />
+  );
+}
+
+function FeminineTab() {
+  const { vinyls } = useVinyls();
+  const feminineVinyls = vinyls.filter(v => v.gender === 'feminino');
+  return <VinylList data={feminineVinyls} />;
+}
+
+function MasculineTab() {
+  const { vinyls } = useVinyls();
+  const masculineVinyls = vinyls.filter(v => v.gender === 'masculino');
+  return <VinylList data={masculineVinyls} />;
+}
+
+export function ProductsScreen() {
+  const insets = useSafeAreaInsets();
+  const { logout } = useAuth();
+  const router = useRouter();
+  const [index, setIndex] = useState(0);
+  const routes = [
+    { key: 'feminino', title: 'DISCOS FEMININOS' },
+    { key: 'masculino', title: 'DISCOS MASCULINOS' },
+  ];
+
+  const handleLogout = () => {
+    logout();
+    router.replace('/login');
+  };
+
+  const renderScene = SceneMap({
+    feminino: FeminineTab,
+    masculino: MasculineTab,
+  });
+
+  return (
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.topBar}>
         <View style={styles.brandRow}>
           <Logo variant="small" />
@@ -36,53 +126,11 @@ export function ProductsScreen() {
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={vinyls}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        contentContainerStyle={styles.list}
-        columnWrapperStyle={styles.row}
-        renderItem={({ item }) => {
-          const imageSource = typeof item.image === 'string' ? { uri: item.image } : item.image;
-
-          return (
-            <TouchableOpacity
-              style={styles.card}
-              activeOpacity={0.8}
-              onPress={() => handlePressVinyl(item.id)}
-              onLongPress={() => router.push(`/edit-product/${item.id}`)}
-            >
-              <Image source={imageSource} style={styles.thumbnail} />
-              <View style={styles.cardBody}>
-                <Text numberOfLines={1} style={styles.productTitle}>
-                  {item.title}
-                </Text>
-                <Text numberOfLines={1} style={styles.productArtist}>
-                  {item.artist}
-                </Text>
-                <Text style={styles.price}>R$ {item.price.toFixed(2)}</Text>
-              </View>
-            </TouchableOpacity>
-          );
-        }}
-        ListFooterComponent={() => (
-          <View style={styles.footerButtons}>
-            <TouchableOpacity
-              style={styles.footerButton}
-              onPress={() => router.push('/add-product')}
-            >
-              <Text style={styles.footerButtonText}>Adicionar disco</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.footerButton, styles.footerButtonSecondary]}
-              onPress={() => router.push('/settings')}
-            >
-              <Text style={[styles.footerButtonText, styles.footerButtonSecondaryText]}>
-                Gerenciar discos
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
+      <TabView
+        navigationState={{ index, routes }}
+        renderScene={renderScene}
+        onIndexChange={setIndex}
+        style={styles.tabView}
       />
     </View>
   );
@@ -122,6 +170,9 @@ const styles = StyleSheet.create({
   logoutText: {
     color: '#fff',
     fontWeight: '700',
+  },
+  tabView: {
+    flex: 1,
   },
   list: {
     paddingHorizontal: 12,

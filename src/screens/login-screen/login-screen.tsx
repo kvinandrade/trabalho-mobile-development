@@ -15,6 +15,7 @@ import {
     TouchableWithoutFeedback,
     View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Logo } from '../../components/logo';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -26,6 +27,7 @@ export function LoginScreen() {
 
   const { login } = useAuth();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const validate = () => {
     if (!email.trim()) {
@@ -63,7 +65,7 @@ export function LoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
-        contentContainerStyle={styles.container}
+        contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
         keyboardShouldPersistTaps="handled"
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

@@ -11,18 +11,21 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useVinyls } from '../../src/contexts/VinylsContext';
 
 export default function EditProductScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { getVinyl, updateVinyl, removeVinyl } = useVinyls();
+  const insets = useSafeAreaInsets();
 
   const [title, setTitle] = useState('');
   const [artist, setArtist] = useState('');
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [gender, setGender] = useState<'feminino' | 'masculino'>('feminino');
 
   useEffect(() => {
     if (!id) return;
@@ -34,6 +37,7 @@ export default function EditProductScreen() {
     setPrice(String(vinyl.price));
     setDescription(vinyl.description);
     setImageUrl(typeof vinyl.image === 'string' ? vinyl.image : '');
+    setGender(vinyl.gender);
   }, [id, getVinyl]);
 
   const handleSave = () => {
@@ -49,6 +53,7 @@ export default function EditProductScreen() {
       price: Number(price) || 0,
       description: description.trim(),
       image: imageUrl.trim() ? { uri: imageUrl.trim() } : undefined,
+      gender,
     });
 
     router.replace('/products');
@@ -75,7 +80,7 @@ export default function EditProductScreen() {
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 20 }]} keyboardShouldPersistTaps="handled">
         <Text style={styles.title}>Editar disco</Text>
 
         <View style={styles.field}>
@@ -131,6 +136,28 @@ export default function EditProductScreen() {
           />
         </View>
 
+        <View style={styles.field}>
+          <Text style={styles.label}>Gênero</Text>
+          <View style={styles.genderRow}>
+            <TouchableOpacity
+              style={[styles.genderButton, gender === 'feminino' && styles.genderSelected]}
+              onPress={() => setGender('feminino')}
+            >
+              <Text style={[styles.genderText, gender === 'feminino' && styles.genderTextSelected]}>
+                Feminino
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.genderButton, gender === 'masculino' && styles.genderSelected]}
+              onPress={() => setGender('masculino')}
+            >
+              <Text style={[styles.genderText, gender === 'masculino' && styles.genderTextSelected]}>
+                Masculino
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         <TouchableOpacity style={styles.button} onPress={handleSave}>
           <Text style={styles.buttonLabel}>Salvar alterações</Text>
         </TouchableOpacity>
@@ -179,6 +206,32 @@ const styles = StyleSheet.create({
   multiline: {
     minHeight: 90,
     textAlignVertical: 'top',
+  },
+  genderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  genderButton: {
+    flex: 1,
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 5,
+    backgroundColor: '#fafafa',
+  },
+  genderSelected: {
+    backgroundColor: '#1b74e4',
+    borderColor: '#1b74e4',
+  },
+  genderText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  genderTextSelected: {
+    color: '#fff',
   },
   button: {
     height: 52,

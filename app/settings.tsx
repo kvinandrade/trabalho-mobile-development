@@ -1,10 +1,12 @@
 import { useRouter } from 'expo-router';
 import { FlatList, Text, TouchableOpacity, View, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useVinyls } from '../src/contexts/VinylsContext';
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { vinyls, removeVinyl } = useVinyls();
+  const insets = useSafeAreaInsets();
 
   const customVinyls = vinyls.filter((v) => v.isCustom);
 
@@ -17,7 +19,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top + 20 }]}>
       <Text style={styles.title}>Gerenciar discos</Text>
       <FlatList
         data={customVinyls}

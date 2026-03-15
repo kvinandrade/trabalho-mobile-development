@@ -6,6 +6,7 @@ export type Vinyl = {
   description: string;
   image: any; // Image source (local require or URL)
   tracks: string[];
+  gender: 'feminino' | 'masculino';
   isCustom?: boolean;
 };
 
@@ -18,6 +19,7 @@ export const vinyls: Vinyl[] = [
     description:
       'Midnights é o décimo álbum de estúdio de Taylor Swift, lançado em 2022. Uma coleção de reflexões noturnas com produção pop moderna e letras íntimas.',
     image: require('../assets/taylor.png'),
+    gender: 'feminino',
     tracks: [
       'Lavender Haze',
       'Maroon',
@@ -36,6 +38,7 @@ export const vinyls: Vinyl[] = [
     description:
       'Bedtime Stories é o sexto álbum de Madonna, lançado em 1994, explorando R&B e pop suave em uma vibe noturna e relaxante.',
     image: require('../assets/madonna.png'),
+    gender: 'feminino',
     tracks: [
       'Secret',
       'Take a Bow',
@@ -54,6 +57,7 @@ export const vinyls: Vinyl[] = [
     description:
       'West End Girl é um single icônico de Lily Allen de 2006, com letras satíricas sobre a vida urbana em Londres.',
     image: require('../assets/lilly.png'),
+    gender: 'feminino',
     tracks: ['West End Girl', 'Not Fair (B-side)', 'Littlest Things (Live)'],
   },
   {
@@ -64,6 +68,7 @@ export const vinyls: Vinyl[] = [
     description:
       'Mans Best Friend é um single pop de Sabrina Carpenter com uma batida contagiante e letras sobre empoderamento pessoal.',
     image: require('../assets/sabrina.png'),
+    gender: 'feminino',
     tracks: ['Mans Best Friend', 'Feather', 'Archer (Acoustic)'],
   },
 ];
